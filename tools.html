@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<!--
+	CCA 3.0 license (modified from html5up.net)
+-->
+<html>
+	<head>
+		<title>Tools - AVB Community</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="no-sidebar is-preload">
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<section id="header">
+					<div class="container">
+
+						<!-- Logo -->
+							<h1 id="logo"><a href="index.html">Tools</a></h1>
+							<p>Network utilities and resources.</p>
+
+						<!-- Nav -->
+							<nav id="nav">
+								<ul>
+									<li><a class="icon solid fa-microchip" href="index.html"><span>AVB Community</span></a></li>
+									<li><a class="icon solid fa-clipboard-list" href="profiles.html"><span>Profiles</span></a></li>
+									<li><a class="icon solid fa-terminal" href="tools.html"><span>Tools</span></a></li>
+								</ul>
+							</nav>
+
+					</div>
+				</section>
+
+			<!-- Main -->
+				<section id="main">
+					<div class="container">
+						<div id="content">
+
+							<!-- Post -->
+								<article class="box post">
+									<header>
+										<nav id="profile-nav">
+											<a href="#" class="profile-tab active" data-tool="analyzer">Audio Analyzer</a>
+											<a href="#" class="profile-tab" data-tool="controller">AVB Controller</a>
+										</nav>
+									</header>
+
+									<section id="profile-content">
+										<div id="profile-content-body"></div>
+									</section>
+								</article>
+
+						</div>
+					</div>
+				</section>
+
+<!-- Footer -->
+				<section id="footer">
+					<div class="container">
+						<small>Profile specifications and tools are licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>. This website is licensed under the <a href="https://creativecommons.org/licenses/by/3.0/">CCA 3.0 License</a>.</small>
+					</div>
+				</section>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.dropotron.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+				var toolDescriptions = {
+					analyzer: '<h3>Audio Analyzer</h3><p>Extracts and analyzes PCM audio from AVTP (IEEE 1722-2016) packet captures. Reads pcap/pcapng files containing AVTP audio streams in AAF PCM or IEC 61883-6 AM824 format and performs signal analysis including glitch detection, silence gap identification, signal-to-noise ratio, and total harmonic distortion measurements.</p><p>Source: <a href="https://github.com/avbcommunity/tools">avbcommunity/tools</a> &mdash; <code>avb_audio_analyzer.py</code></p>',
+					controller: '<h3>AVB Controller</h3><p>An ATDECC (IEEE 1722.1-2021) controller for managing AVB stream connections. Discovers AVB entities on the network via ADP, connects and disconnects talkers and listeners via ACMP, and queries stream information via AECP. Requires Linux with root privileges or <code>CAP_NET_RAW</code> capability.</p><p>Source: <a href="https://github.com/avbcommunity/tools">avbcommunity/tools</a> &mdash; <code>avb_controller.py</code></p>'
+				};
+
+				function loadTool(tool) {
+					document.getElementById('profile-content-body').innerHTML = toolDescriptions[tool] || '<p>Tool not found.</p>';
+				}
+
+				document.querySelectorAll('.profile-tab').forEach(function(tab) {
+					tab.addEventListener('click', function(e) {
+						e.preventDefault();
+						document.querySelectorAll('.profile-tab').forEach(function(t) {
+							t.classList.remove('active');
+						});
+						this.classList.add('active');
+						loadTool(this.getAttribute('data-tool'));
+					});
+				});
+
+				loadTool('analyzer');
+			</script>
+
+	</body>
+</html>
