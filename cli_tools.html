@@ -4,7 +4,7 @@
 -->
 <html>
 	<head>
-		<title>Tools - AVB Community</title>
+		<title>CLI Tools - AVB Community</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
 					<div class="container">
 
 						<!-- Logo -->
-							<h1 id="logo"><a href="index.html">Tools</a></h1>
+							<h1 id="logo"><a href="index.html">CLI Tools</a></h1>
 							<p>Network utilities and resources.</p>
 
 						<!-- Nav -->
@@ -27,7 +27,7 @@
 								<ul>
 									<li><a class="icon solid fa-microchip" href="index.html"><span>AVB Community</span></a></li>
 									<li><a class="icon solid fa-clipboard-list" href="profiles.html"><span>Profiles</span></a></li>
-									<li><a class="icon solid fa-terminal" href="tools.html"><span>Tools</span></a></li>
+									<li><a class="icon solid fa-terminal" href="cli_tools.html"><span>CLI Tools</span></a></li>
 								</ul>
 							</nav>
 
@@ -43,8 +43,8 @@
 								<article class="box post">
 									<header>
 										<nav id="profile-nav">
-											<a href="#" class="profile-tab active" data-tool="analyzer">Audio Analyzer</a>
-											<a href="#" class="profile-tab" data-tool="controller">AVB Controller</a>
+											<a href="#" class="profile-tab active" data-tool="controller">AVB Controller</a>
+											<a href="#" class="profile-tab" data-tool="analyzer">Audio Analyzer</a>
 										</nav>
 									</header>
 
@@ -75,8 +75,8 @@
 			<script src="assets/js/main.js"></script>
 			<script>
 				var toolDescriptions = {
-					analyzer: '<h3>Audio Analyzer</h3><p>Extracts and analyzes PCM audio from AVTP (IEEE 1722-2016) packet captures. Reads pcap/pcapng files containing AVTP audio streams in AAF PCM or IEC 61883-6 AM824 format and performs signal analysis including glitch detection, silence gap identification, signal-to-noise ratio, and total harmonic distortion measurements.</p><p>Source: <a href="https://github.com/avbcommunity/tools">avbcommunity/tools</a> &mdash; <code>avb_audio_analyzer.py</code></p>',
-					controller: '<h3>AVB Controller</h3><p>An ATDECC (IEEE 1722.1-2021) controller for managing AVB stream connections. Discovers AVB entities on the network via ADP, connects and disconnects talkers and listeners via ACMP, and queries stream information via AECP. Requires Linux with root privileges or <code>CAP_NET_RAW</code> capability.</p><p>Source: <a href="https://github.com/avbcommunity/tools">avbcommunity/tools</a> &mdash; <code>avb_controller.py</code></p>'
+					analyzer: '<h3>Audio Analyzer</h3><p>Extracts and analyzes PCM audio from AVTP (IEEE 1722-2016) packet captures. Reads pcap and pcapng files containing AVTP audio streams in AAF PCM or IEC 61883-6 AM824 format, decodes raw PCM samples, and optionally writes them to a WAV file for downstream listening or processing.</p><h4>Features</h4><ul><li><strong>Stream extraction</strong> &mdash; decodes AAF PCM and IEC 61883-6 AM824 streams; auto-detects sample rate for AAF, with a configurable fallback for AM824.</li><li><strong>Filtering</strong> &mdash; isolate a single talker by source MAC and select an individual channel from multi-channel streams.</li><li><strong>WAV export</strong> &mdash; write the extracted channel to a mono 16/24-bit WAV file.</li><li><strong>Signal report</strong> &mdash; peak / RMS levels in dBFS, packet and sample counts, stream duration, and AVTP sequence-gap detection.</li><li><strong>Discontinuity &amp; silence detection</strong> &mdash; finds sample-to-sample jumps above an adaptive threshold and near-zero runs longer than 1 ms.</li><li><strong>Frequency analysis</strong> <em>(numpy)</em> &mdash; fundamental frequency, SNR, and THD across harmonics 2&ndash;10.</li><li><strong>Phase continuity</strong> <em>(scipy)</em> &mdash; Hilbert-transform phase analysis with periodic-glitch detection, plus windowed RMS-envelope anomaly scanning.</li><li><strong>Pure-Python fallback</strong> &mdash; basic level and discontinuity analysis runs without numpy or scipy installed.</li></ul><p>Requires Python 3 and <code>editcap</code> (from Wireshark) for pcapng input. Optional: <code>numpy</code>, <code>scipy</code>.</p><p>Source: <a href="https://github.com/avbcommunity/tools">avbcommunity/tools</a> &mdash; <code>avb_audio_analyzer.py</code></p>',
+					controller: '<h3>AVB Controller</h3><p>A minimal ATDECC (IEEE 1722.1-2021) controller for discovering AVB devices and managing stream connections on a local network. Speaks the three ATDECC protocols &mdash; ADP for discovery, ACMP for connection management, and AECP for enumeration and control &mdash; over raw <code>AF_PACKET</code> sockets using ethertype <code>0x22F0</code>.</p><h4>Features</h4><ul><li><strong><code>discover</code></strong> &mdash; lists entities advertising on the network with their roles (talker / listener / controller), MAC, model ID, and stream counts; <code>--streams</code> appends per-entity stream descriptors and supported format ranges.</li><li><strong><code>stream-info</code></strong> &mdash; queries live stream state for an entity: current format, stream ID, destination MAC, VLAN, SR class, MSRP failure code, accumulated latency, and connection status.</li><li><strong><code>connect</code> / <code>disconnect</code></strong> &mdash; binds or releases a listener stream input to a talker stream output via ACMP; <code>--format</code> first applies <code>SET_STREAM_FORMAT</code> to both endpoints so they agree on rate, bit depth, and channel count.</li><li><strong><code>get-tx-state</code></strong> &mdash; asks a talker how many listeners it believes are subscribed to one of its outputs &mdash; useful when talker and listener disagree about connection state.</li><li><strong><code>direct-disconnect-tx</code></strong> &mdash; sends <code>DISCONNECT_TX_COMMAND</code> straight to a talker, bypassing the listener-driven flow, for diagnostics or clearing stuck registrations.</li><li><strong>Stream format presets</strong> &mdash; AAF PCM and IEC 61883-6 AM824 at 44.1, 48, 96, 176.4, and 192 kHz (24-bit, 8-channel).</li><li><strong>Transient controller entity</strong> &mdash; its own entity ID is derived from the local interface MAC (EUI-64); no state is kept between invocations.</li></ul><p>Linux only; requires Python 3 (standard library only) and either root privileges or the <code>CAP_NET_RAW</code> capability.</p><p>Source: <a href="https://github.com/avbcommunity/tools">avbcommunity/tools</a> &mdash; <code>avb_controller.py</code></p>'
 				};
 
 				function loadTool(tool) {
@@ -94,7 +94,7 @@
 					});
 				});
 
-				loadTool('analyzer');
+				loadTool('controller');
 			</script>
 
 	</body>
