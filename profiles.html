@@ -43,12 +43,12 @@
 								<article class="box post">
 									<header>
 										<nav id="profile-nav">
-											<a href="#" class="profile-tab active" data-file="audio_basic.md">Basic Audio</a>
-											<a href="#" class="profile-tab" data-file="audio_extended.md">Extended Audio</a>
-											<a href="#" class="profile-tab" data-file="video_basic.md">Basic Video</a>
-											<a href="#" class="profile-tab" data-file="video_extended.md">Extended Video</a>
-											<a href="#" class="profile-tab" data-file="avb_lite.md">AVB Lite</a>
-											<a href="#" class="profile-tab" data-file="avb_wireless.md">AVB Wireless</a>
+											<a href="#audio_basic" class="profile-tab active" data-file="audio_basic.md">Basic Audio</a>
+											<a href="#audio_extended" class="profile-tab" data-file="audio_extended.md">Extended Audio</a>
+											<a href="#video_basic" class="profile-tab" data-file="video_basic.md">Basic Video</a>
+											<a href="#video_extended" class="profile-tab" data-file="video_extended.md">Extended Video</a>
+											<a href="#avb_lite" class="profile-tab" data-file="avb_lite.md">AVB Lite</a>
+											<a href="#avb_wireless" class="profile-tab" data-file="avb_wireless.md">AVB Wireless</a>
 										</nav>
 									</header>
 
@@ -96,18 +96,22 @@
 						});
 				}
 
-				document.querySelectorAll('.profile-tab').forEach(function(tab) {
-					tab.addEventListener('click', function(e) {
-						e.preventDefault();
-						document.querySelectorAll('.profile-tab').forEach(function(t) {
-							t.classList.remove('active');
-						});
-						this.classList.add('active');
-						loadProfile(this.getAttribute('data-file'));
+				// Select the tab named by the URL hash (e.g. #avb_lite), else the first tab.
+				function selectFromHash() {
+					var name = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/-/g, '_');
+					var tabs = document.querySelectorAll('.profile-tab');
+					var selected = tabs[0];
+					tabs.forEach(function(tab) {
+						if (tab.getAttribute('data-file') === name + '.md') selected = tab;
 					});
-				});
+					tabs.forEach(function(tab) {
+						tab.classList.toggle('active', tab === selected);
+					});
+					loadProfile(selected.getAttribute('data-file'));
+				}
 
-				loadProfile('audio_basic.md');
+				window.addEventListener('hashchange', selectFromHash);
+				selectFromHash();
 			</script>
 
 	</body>
