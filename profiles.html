@@ -79,25 +79,12 @@
 			<script src="assets/js/main.js"></script>
 			<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 			<script>
-				// GitHub's API reads the profile from the repository as it is now;
-				// its raw file host serves a copy up to 5 minutes old.
-				var apiUrl = 'https://api.github.com/repos/avbcommunity/profiles/contents/';
-				var rawUrl = 'https://raw.githubusercontent.com/avbcommunity/profiles/refs/heads/main/';
+				var baseUrl = 'https://raw.githubusercontent.com/avbcommunity/profiles/refs/heads/main/';
 
 				function loadProfile(filename) {
 					document.getElementById('profile-content-body').innerHTML = '<p>Loading...</p>';
-					fetch(apiUrl + filename + '?ref=main', {
-						cache: 'no-cache',
-						headers: { 'Accept': 'application/vnd.github.raw' }
-					})
-						.then(function(response) {
-							if (!response.ok) throw new Error('API ' + response.status);
-							return response;
-						})
-						// Past GitHub's 60 API requests an hour, the raw file host's copy.
-						.catch(function() {
-							return fetch(rawUrl + filename, { cache: 'no-cache' });
-						})
+					// Ask GitHub each time rather than reuse the browser's copy.
+					fetch(baseUrl + filename, { cache: 'no-cache' })
 						.then(function(response) {
 							if (!response.ok) throw new Error('Failed to load profile');
 							return response.text();
