@@ -91,29 +91,64 @@
 							return response.text();
 						})
 						.then(function(markdown) {
-							document.getElementById('profile-content-body').innerHTML = marked.parse(markdown);
+							var body = document.getElementById('profile-content-body');
+							body.innerHTML = marked.parse(markdown);
+							addHeadingIds(body);
 						})
 						.catch(function(err) {
 							document.getElementById('profile-content-body').innerHTML = '<p>Unable to load profile.</p>';
 						});
 				}
 
-				// Select the tab named by the URL hash (e.g. #avb_lite), else the first tab.
-				function selectFromHash() {
-					var name = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/-/g, '_');
-					var tabs = document.querySelectorAll('.profile-tab');
-					var selected = tabs[0];
-					tabs.forEach(function(tab) {
-						if (tab.getAttribute('data-file') === name + '.md') selected = tab;
+				// GitHub-style heading slugs, so a profile's own section links
+				// (e.g. #24-mode-reporting, #7-forwarding--qos) resolve here too.
+				function addHeadingIds(body) {
+					var used = {};
+					body.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(function(heading) {
+						var slug = heading.textContent.toLowerCase().trim()
+							.replace(/[^\p{L}\p{N}_\- ]/gu, '')
+							.replace(/ /g, '-');
+						var id = used[slug] ? slug + '-' + used[slug] : slug;
+						used[slug] = (used[slug] || 0) + 1;
+						heading.id = id;
 					});
-					tabs.forEach(function(tab) {
+				}
+
+				// The tab named by the URL hash (e.g. #avb_lite), or null.
+				function tabFromHash() {
+					var name = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/-/g, '_');
+					var found = null;
+					document.querySelectorAll('.profile-tab').forEach(function(tab) {
+						if (tab.getAttribute('data-file') === name + '.md') found = tab;
+					});
+					return found;
+				}
+
+				function selectTab(selected) {
+					document.querySelectorAll('.profile-tab').forEach(function(tab) {
 						tab.classList.toggle('active', tab === selected);
 					});
 					loadProfile(selected.getAttribute('data-file'));
 				}
 
-				window.addEventListener('hashchange', selectFromHash);
-				selectFromHash();
+				// Section links scroll within the profile and leave the hash
+				// naming the tab, so the URL stays one to share.
+				document.getElementById('profile-content-body').addEventListener('click', function(e) {
+					var link = e.target.closest('a[href^="#"]');
+					if (!link) return;
+					var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+					if (!target) return;
+					e.preventDefault();
+					target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				});
+
+				// Only a hash naming a tab switches tabs.
+				window.addEventListener('hashchange', function() {
+					var tab = tabFromHash();
+					if (tab) selectTab(tab);
+				});
+
+				selectTab(tabFromHash() || document.querySelector('.profile-tab'));
 			</script>
 
 	</body>
